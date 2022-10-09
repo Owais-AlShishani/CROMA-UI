@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, ModalTitle } from 'react-bootstrap'
+import { Button, Modal, ModalTitle, Row } from 'react-bootstrap'
 import axios from 'axios'
 
-const Employee = () => {
+const Order = () => {
     const [Data, setData] = useState([]);
     const [RowData, SetRowData] = useState([])
     const [ViewShow, SetViewShow] = useState(false)
@@ -10,7 +10,6 @@ const Employee = () => {
     const hanldeViewClose = () => { SetViewShow(false) }
     //FOr Edit Model
     const [ViewEdit, SetEditShow] = useState(false)
-    const handleEditShow = () => { SetEditShow(true) }
     const hanldeEditClose = () => { SetEditShow(false) }
     //FOr Delete Model
     const [ViewDelete, SetDeleteShow] = useState(false)
@@ -22,26 +21,28 @@ const Employee = () => {
     const hanldePostClose = () => { SetPostShow(false) }
 
     //Define here local state that store the form Data
-    const [name, setDateFrom] = useState("")
+    const [dateFrom, setDateFrom] = useState("")
     const [dateTo, setDateTo] = useState("")
     const [userName, setUserName] = useState("")
     const [phoneNumber, setPhoneNumber] = useState("")
     const [comment, setComment] = useState("")
 
-    const [Delete,setDelete] = useState(false)
+    const [Delete, setDelete] = useState(false)
     //Id for update record and Delete
-    const [id,setId] = useState("");
-    const GetEmployeeData = () => {
-        //here we will get all employee data
+    const [id, setId] = useState("");
+    const handleEditShow = () => { SetEditShow(true); console.log(RowData); }
+
+    const GetOrderData = () => {
+        //here we will get all Order data
         const url = 'https://localhost:7032/api/Order'
         axios.get(url)
             .then(response => {
                 console.log(response)
                 const result = response.data;
-               
-                    setData(result)
-                    console.log(result)
-                
+
+                setData(result)
+                console.log(result)
+
             })
             .catch(err => {
                 console.log(err)
@@ -49,45 +50,54 @@ const Employee = () => {
     }
     const handleSubmite = () => {
         const url = 'https://localhost:7032/api/Order'
-        
+
         axios.post(url)
             .then(response => {
                 const result = response.data;
-             
-              
-                   
-                    window.location.reload()
-                
+
+
+
+                window.location.reload()
+
             })
             .catch(err => {
                 console.log(err)
             })
     }
-    const handleEdit = () =>{
-        const url = `https://localhost:7032/api/Order/${id}`
-       
-        axios.put(url)
+    const handleEdit = () => {
+
+        const url = `https://localhost:7032/api/Order/` + RowData.id
+        axios.put(url,
+            {
+                "id": id,
+                "dateFrom": dateFrom,
+                "dateTo": dateTo,
+                "userName": userName,
+                "phoneNumber": phoneNumber,
+                "comment": comment,
+                "carId": 1
+            })
             .then(response => {
                 const result = response.data;
-               
-                  
-                    window.location.reload()
-                
+
+                console.log(setDateFrom)
+                window.location.reload()
+
             })
             .catch(err => {
                 console.log(err)
             })
     }
     //handle Delete Function 
-    const handleDelete = () =>{
+    const handleDelete = () => {
         const url = `https://localhost:7032/api/Order/${id}`
         axios.delete(url)
             .then(response => {
                 const result = response.data;
-              
-                   
-                    window.location.reload()
-                
+
+
+                window.location.reload()
+
             })
             .catch(err => {
                 console.log(err)
@@ -96,14 +106,14 @@ const Employee = () => {
     //call this function in useEffect
     console.log(ViewShow, RowData)
     useEffect(() => {
-        GetEmployeeData();
-    }, [])
+        GetOrderData();
+    }, [ViewEdit])
     return (
         <div>
             <div className='row'>
                 <div className='mt-5 mb-4'>
                     <Button variant='primary' onClick={() => { handlePostShow() }}><i className='fa fa-plu'></i>
-                        Add New Employee
+                        Add New Order
                     </Button>
                 </div>
             </div>
@@ -117,8 +127,9 @@ const Employee = () => {
                                 <th>Date To</th>
                                 <th>User Name</th>
                                 <th>Phone Number</th>
-                                <th>Car Type</th>
                                 <th>Comment</th>
+                                <th>Car Type</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -129,12 +140,12 @@ const Employee = () => {
                                     <td>{item.dateTo}</td>
                                     <td>{item.userName}</td>
                                     <td>{item.phoneNumber}</td>
-                                    <td>{item.carType}</td>
                                     <td>{item.comment}</td>
+                                    <td>{item.car.carType}</td>
                                     <td style={{ minWidth: 190 }}>
                                         <Button size='sm' variant='primary' onClick={() => { handleViewShow(SetRowData(item)) }}>View</Button>|
-                                        <Button size='sm' variant='warning' onClick={()=> {handleEditShow(SetRowData(item),setId(item.id))}}>Edit</Button>|
-                                        <Button size='sm' variant='danger' onClick={() => {handleViewShow(SetRowData(item),setId(item.id), setDelete(true))}}>Delete</Button>|
+                                        <Button size='sm' variant='warning' onClick={() => { handleEditShow(SetRowData(item), setId(item.id), setPhoneNumber(item.phoneNumber), setUserName(item.userName), setDateFrom(item.dateFrom), setDateTo(item.dateTo), setComment(item.comment)) }}>Edit</Button>|
+                                        <Button size='sm' variant='danger' onClick={() => { handleViewShow(SetRowData(item), setId(item.id), setDelete(true)) }}>Delete</Button>|
                                     </td>
                                 </tr>
                             )}
@@ -151,7 +162,7 @@ const Employee = () => {
                     keyboard={false}
                 >
                     <Modal.Header closeButton>
-                        <Modal.Title>View Employee Data</Modal.Title>
+                        <Modal.Title>View Order Data</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <div>
@@ -172,7 +183,7 @@ const Employee = () => {
                             </div>
                             {
                                 Delete && (
-                                    <Button type='submit' className='btn btn-danger mt-4' onClick={handleDelete}>Delete Employee</Button>
+                                    <Button type='submit' className='btn btn-danger mt-4' onClick={handleDelete}>Delete Order</Button>
                                 )
                             }
                         </div>
@@ -191,7 +202,7 @@ const Employee = () => {
                     keyboard={false}
                 >
                     <Modal.Header closeButton>
-                        <Modal.Title>Add new Employee</Modal.Title>
+                        <Modal.Title>Add new Order</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <div>
@@ -210,7 +221,7 @@ const Employee = () => {
                             <div className='form-group mt-3'>
                                 <input type="text" className='form-control' onChange={(e) => setComment(e.target.value)} placeholder="Please enter Address" />
                             </div>
-                            <Button type='submit' className='btn btn-success mt-4' onClick={handleSubmite}>Add Employee</Button>
+                            <Button type='submit' className='btn btn-success mt-4' onClick={handleSubmite}>Add Order</Button>
                         </div>
                     </Modal.Body>
                     <Modal.Footer>
@@ -218,7 +229,7 @@ const Employee = () => {
                     </Modal.Footer>
                 </Modal>
             </div>
-            {/* Modal for Edit employee record */}
+            {/* Modal for Edit Order record */}
             <div className='model-box-view'>
                 <Modal
                     show={ViewEdit}
@@ -227,13 +238,13 @@ const Employee = () => {
                     keyboard={false}
                 >
                     <Modal.Header closeButton>
-                        <Modal.Title>Edit Employee</Modal.Title>
+                        <Modal.Title>Edit Order</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <div>
                             <div className='form-group'>
                                 <label>Name</label>
-                                <input type="text" className='form-control' onChange={(e) => setDateFrom(e.target.value)} placeholder="Please enter Date From" defaultValue={RowData.dateFrom}/>
+                                <input type="text" className='form-control' onChange={(e) => setDateFrom(e.target.value)} placeholder="Please enter Date From" defaultValue={RowData.dateFrom} />
                             </div>
                             <div className='form-group mt-3'>
                                 <label>Email</label>
@@ -241,17 +252,17 @@ const Employee = () => {
                             </div>
                             <div className='form-group mt-3'>
                                 <label>Number</label>
-                                <input type="text" className='form-control' onChange={(e) => setUserName(e.target.value)} placeholder="Please enter Number" defaultValue={RowData.userName}/>
+                                <input type="text" className='form-control' onChange={(e) => setUserName(e.target.value)} placeholder="Please enter Number" defaultValue={RowData.userName} />
                             </div>
                             <div className='form-group mt-3'>
                                 <label>NIC</label>
-                                <input type="text" className='form-control' onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Please enter NIC" defaultValue={RowData.phoneNumber}/>
+                                <input type="text" className='form-control' onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Please enter NIC" defaultValue={RowData.phoneNumber} />
                             </div>
                             <div className='form-group mt-3'>
                                 <label>Address</label>
-                                <input type="text" className='form-control' onChange={(e) => setComment(e.target.value)} placeholder="Please enter Address" defaultValue={RowData.comment}/>
+                                <input type="text" className='form-control' onChange={(e) => setComment(e.target.value)} placeholder="Please enter Address" defaultValue={RowData.comment} />
                             </div>
-                            <Button type='submit' className='btn btn-warning mt-4' onClick={handleEdit}>Edit Employee</Button>
+                            <Button type='submit' className='btn btn-warning mt-4' onClick={handleEdit}>Edit Order</Button>
                         </div>
                     </Modal.Body>
                     <Modal.Footer>
@@ -263,4 +274,4 @@ const Employee = () => {
     );
 };
 
-export default Employee;
+export default Order;
