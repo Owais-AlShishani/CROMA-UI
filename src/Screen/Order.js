@@ -1,73 +1,67 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, ModalTitle, Row } from 'react-bootstrap'
+import { Button, Modal, } from 'react-bootstrap'
 import axios from 'axios'
 
 const Order = () => {
+    const url = 'https://localhost:7032/api/Order/'
+
     const [Data, setData] = useState([]);
     const [RowData, SetRowData] = useState([])
     const [ViewShow, SetViewShow] = useState(false)
+    const [Delete, setDelete] = useState(false)
+
     const handleViewShow = () => { SetViewShow(true) }
     const hanldeViewClose = () => { SetViewShow(false) }
-    //FOr Edit Model
+
     const [ViewEdit, SetEditShow] = useState(false)
     const hanldeEditClose = () => { SetEditShow(false) }
-    //FOr Delete Model
-    const [ViewDelete, SetDeleteShow] = useState(false)
-    const handleDeleteShow = () => { SetDeleteShow(true) }
-    const hanldeDeleteClose = () => { SetDeleteShow(false) }
-    //FOr Add New Data Model
+
     const [ViewPost, SetPostShow] = useState(false)
     const handlePostShow = () => { SetPostShow(true) }
     const hanldePostClose = () => { SetPostShow(false) }
 
-    //Define here local state that store the form Data
     const [dateFrom, setDateFrom] = useState("")
     const [dateTo, setDateTo] = useState("")
     const [userName, setUserName] = useState("")
     const [phoneNumber, setPhoneNumber] = useState("")
     const [comment, setComment] = useState("")
-
-    const [Delete, setDelete] = useState(false)
-    //Id for update record and Delete
+    const [car, setCar] = useState("")
     const [id, setId] = useState("");
-    const handleEditShow = () => { SetEditShow(true); console.log(RowData); }
+
+    const handleEditShow = () => { SetEditShow(true); }
 
     const GetOrderData = () => {
-        //here we will get all Order data
-        const url = 'https://localhost:7032/api/Order'
+
         axios.get(url)
             .then(response => {
-                console.log(response)
+
                 const result = response.data;
 
                 setData(result)
-                console.log(result)
+            })
 
-            })
-            .catch(err => {
-                console.log(err)
-            })
     }
     const handleSubmite = () => {
-        const url = 'https://localhost:7032/api/Order'
 
-        axios.post(url)
+        axios.post(url,
+            {
+                "dateFrom": dateFrom,
+                "dateTo": dateTo,
+                "userName": userName,
+                "phoneNumber": phoneNumber,
+                "comment": comment,
+                "carId": car
+            })
             .then(response => {
-                const result = response.data;
-
-
 
                 window.location.reload()
 
             })
-            .catch(err => {
-                console.log(err)
-            })
+
     }
     const handleEdit = () => {
 
-        const url = `https://localhost:7032/api/Order/` + RowData.id
-        axios.put(url,
+        axios.put(url + RowData.id,
             {
                 "id": id,
                 "dateFrom": dateFrom,
@@ -75,36 +69,26 @@ const Order = () => {
                 "userName": userName,
                 "phoneNumber": phoneNumber,
                 "comment": comment,
-                "carId": 1
+                "carId": car
             })
             .then(response => {
-                const result = response.data;
 
-                console.log(setDateFrom)
                 window.location.reload()
 
             })
-            .catch(err => {
-                console.log(err)
-            })
+
     }
-    //handle Delete Function 
+
     const handleDelete = () => {
-        const url = `https://localhost:7032/api/Order/${id}`
-        axios.delete(url)
+        axios.delete(url + RowData.id)
             .then(response => {
-                const result = response.data;
-
 
                 window.location.reload()
+            })
 
-            })
-            .catch(err => {
-                console.log(err)
-            })
     }
-    //call this function in useEffect
-    console.log(ViewShow, RowData)
+
+
     useEffect(() => {
         GetOrderData();
     }, [ViewEdit])
@@ -128,6 +112,7 @@ const Order = () => {
                                 <th>User Name</th>
                                 <th>Phone Number</th>
                                 <th>Comment</th>
+                                <th>Car ID</th>
                                 <th>Car Type</th>
 
                             </tr>
@@ -141,9 +126,9 @@ const Order = () => {
                                     <td>{item.userName}</td>
                                     <td>{item.phoneNumber}</td>
                                     <td>{item.comment}</td>
+                                    <td>{item.carId}</td>
                                     <td>{item.car.carType}</td>
                                     <td style={{ minWidth: 190 }}>
-                                        <Button size='sm' variant='primary' onClick={() => { handleViewShow(SetRowData(item)) }}>View</Button>|
                                         <Button size='sm' variant='warning' onClick={() => { handleEditShow(SetRowData(item), setId(item.id), setPhoneNumber(item.phoneNumber), setUserName(item.userName), setDateFrom(item.dateFrom), setDateTo(item.dateTo), setComment(item.comment)) }}>Edit</Button>|
                                         <Button size='sm' variant='danger' onClick={() => { handleViewShow(SetRowData(item), setId(item.id), setDelete(true)) }}>Delete</Button>|
                                     </td>
@@ -153,7 +138,7 @@ const Order = () => {
                     </table>
                 </div>
             </div>
-            {/* View Modal */}
+
             <div className='model-box-view'>
                 <Modal
                     show={ViewShow}
@@ -167,18 +152,23 @@ const Order = () => {
                     <Modal.Body>
                         <div>
                             <div className='form-group'>
+                            <label>Date From</label>
                                 <input type="text" className='form-control' value={RowData.dateFrom} readOnly />
                             </div>
                             <div className='form-group mt-3'>
+                            <label>Date TO</label>
                                 <input type="text" className='form-control' value={RowData.dateTo} readOnly />
                             </div>
                             <div className='form-group mt-3'>
+                            <label>User Name</label>
                                 <input type="text" className='form-control' value={RowData.userName} readOnly />
                             </div>
                             <div className='form-group mt-3'>
+                            <label>Phone Number</label>
                                 <input type="text" className='form-control' value={RowData.phoneNumber} readOnly />
                             </div>
                             <div className='form-group mt-3'>
+                            <label>Comment</label>
                                 <input type="text" className='form-control' value={RowData.comment} readOnly />
                             </div>
                             {
@@ -193,7 +183,7 @@ const Order = () => {
                     </Modal.Footer>
                 </Modal>
             </div>
-            {/* Modal for submit data to database */}
+
             <div className='model-box-view'>
                 <Modal
                     show={ViewPost}
@@ -213,14 +203,29 @@ const Order = () => {
                                 <input type="date" className='form-control' onChange={(e) => setDateTo(e.target.value)} placeholder="Please enter Date To" />
                             </div>
                             <div className='form-group mt-3'>
-                                <input type="text" className='form-control' onChange={(e) => setUserName(e.target.value)} placeholder="Please enter Number" />
+                                <input type="text" className='form-control' onChange={(e) => setUserName(e.target.value)} placeholder="Please enter User Name" />
                             </div>
                             <div className='form-group mt-3'>
-                                <input type="text" className='form-control' onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Please enter NIC" />
+                                <input type="text" className='form-control' onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Please enter Phone Number" />
                             </div>
                             <div className='form-group mt-3'>
-                                <input type="text" className='form-control' onChange={(e) => setComment(e.target.value)} placeholder="Please enter Address" />
+                                <input type="text" className='form-control' onChange={(e) => setComment(e.target.value)} placeholder="Comment" />
                             </div>
+
+                            <div class="input-group mt-3">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="inputGroupCar">Car Type</label>
+                                </div>
+                                <select class="custom-select" id="inputGroupCar" onChange={(e) => setCar(e.target.value)}>
+                                    <option selected>Choose...</option>
+                                    <option value="1">BMW</option>
+                                    <option value="2">KIA</option>
+                                    <option value="3">TOYOTA</option>
+                                    <option value="4">SUBARU</option>
+                                </select>
+                            </div>
+
+
                             <Button type='submit' className='btn btn-success mt-4' onClick={handleSubmite}>Add Order</Button>
                         </div>
                     </Modal.Body>
@@ -229,7 +234,7 @@ const Order = () => {
                     </Modal.Footer>
                 </Modal>
             </div>
-            {/* Modal for Edit Order record */}
+
             <div className='model-box-view'>
                 <Modal
                     show={ViewEdit}
@@ -243,25 +248,37 @@ const Order = () => {
                     <Modal.Body>
                         <div>
                             <div className='form-group'>
-                                <label>Name</label>
-                                <input type="text" className='form-control' onChange={(e) => setDateFrom(e.target.value)} placeholder="Please enter Date From" defaultValue={RowData.dateFrom} />
+                                <label>Date From</label>
+                                <input type="date" className='form-control' onChange={(e) => setDateFrom(e.target.value)} placeholder="Please enter Date From" defaultValue={RowData.dateFrom} />
                             </div>
                             <div className='form-group mt-3'>
-                                <label>Email</label>
-                                <input type="email" className='form-control' onChange={(e) => setDateTo(e.target.value)} placeholder="Please enter email" defaultValue={RowData.dateTo} />
+                                <label>Date To</label>
+                                <input type="date" className='form-control' onChange={(e) => setDateTo(e.target.value)} placeholder="Please enter Date To" defaultValue={RowData.dateTo} />
                             </div>
                             <div className='form-group mt-3'>
-                                <label>Number</label>
-                                <input type="text" className='form-control' onChange={(e) => setUserName(e.target.value)} placeholder="Please enter Number" defaultValue={RowData.userName} />
+                                <label>User Name</label>
+                                <input type="text" className='form-control' onChange={(e) => setUserName(e.target.value)} placeholder="Please enter User Name" defaultValue={RowData.userName} />
                             </div>
                             <div className='form-group mt-3'>
-                                <label>NIC</label>
-                                <input type="text" className='form-control' onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Please enter NIC" defaultValue={RowData.phoneNumber} />
+                                <label> Phone Number</label>
+                                <input type="number" className='form-control' onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Please enter Phone Number" defaultValue={RowData.phoneNumber} />
                             </div>
                             <div className='form-group mt-3'>
-                                <label>Address</label>
-                                <input type="text" className='form-control' onChange={(e) => setComment(e.target.value)} placeholder="Please enter Address" defaultValue={RowData.comment} />
+                                <label>Comment</label>
+                                <input type="text" className='form-control' onChange={(e) => setComment(e.target.value)} placeholder="Optional" defaultValue={RowData.comment} />
                             </div>
+                            <div class="input-group mt-3">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="inputGroupCar">Car Type</label>
+                                </div>
+                                <select class="custom-select" id="inputGroupCar" onChange={(e) => setCar(e.target.value)} defaultValue={RowData.carId}>
+                                    <option value="1">BMW</option>
+                                    <option value="2">KIA</option>
+                                    <option value="3">TOYOTA</option>
+                                    <option value="4">SUBARU</option>
+                                </select>
+                            </div>
+
                             <Button type='submit' className='btn btn-warning mt-4' onClick={handleEdit}>Edit Order</Button>
                         </div>
                     </Modal.Body>
